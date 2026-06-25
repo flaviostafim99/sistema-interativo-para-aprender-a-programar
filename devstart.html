@@ -1,0 +1,801 @@
+Aqui está o código completo — copie tudo abaixo e salve como `devstart.html`:
+
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevStart — Plataforma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #050811;
+    --bg1:       #090e1a;
+    --bg2:       #0d1426;
+    --bg3:       #111b33;
+    --cyan:      #00e5ff;
+    --cyan2:     #00b4cc;
+    --purple:    #a855f7;
+    --purple2:   #7c3aed;
+    --green:     #00ff88;
+    --green2:    #00cc6a;
+    --amber:     #ffb700;
+    --pink:      #ff3d9a;
+    --border:    rgba(0,229,255,0.12);
+    --border2:   rgba(0,229,255,0.25);
+    --text:      #e2e8f8;
+    --muted:     #5a6a8a;
+    --mono:      'Space Mono', monospace;
+    --sans:      'Space Grotesk', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg1); }
+  ::-webkit-scrollbar-thumb { background: var(--cyan2); border-radius: 2px; }
+
+  #auth-screen {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; min-height: 100vh; padding: 2rem;
+    background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(0,229,255,.06) 0%, transparent 70%);
+  }
+  .auth-glow {
+    position: absolute; width: 340px; height: 340px;
+    border-radius: 50%; background: rgba(168,85,247,.07);
+    filter: blur(60px); pointer-events: none;
+  }
+  .auth-card {
+    position: relative; z-index: 1;
+    background: var(--bg1); border: 1px solid var(--border2);
+    border-radius: 20px; padding: 2.5rem 2rem; width: 100%; max-width: 380px;
+    box-shadow: 0 0 40px rgba(0,229,255,.05), inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  .auth-logo {
+    width: 52px; height: 52px; margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    border-radius: 14px; display: flex; align-items: center; justify-content: center;
+  }
+  .auth-logo svg { width: 26px; height: 26px; fill: #050811; }
+  .auth-title { font-size: 20px; font-weight: 600; text-align: center; margin-bottom: .3rem; }
+  .auth-sub { font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 1.75rem; }
+  .field-label { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 6px; display: block; }
+  .field-group { margin-bottom: 1rem; }
+  .auth-input {
+    width: 100%; padding: 10px 14px; border: 1px solid var(--border2);
+    border-radius: 10px; font-size: 14px; background: var(--bg2);
+    color: var(--text); outline: none; font-family: var(--sans);
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .auth-input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,229,255,.1); }
+  .btn-primary {
+    width: 100%; padding: 11px; background: linear-gradient(135deg, var(--cyan), var(--purple));
+    color: #050811; border: none; border-radius: 10px; font-size: 14px; font-weight: 700;
+    cursor: pointer; letter-spacing: .03em; transition: opacity .2s, transform .1s;
+    font-family: var(--sans);
+  }
+  .btn-primary:hover { opacity: .9; }
+  .btn-primary:active { transform: scale(.98); }
+  .auth-toggle { font-size: 13px; color: var(--muted); text-align: center; margin-top: 1rem; }
+  .auth-toggle a { color: var(--cyan); cursor: pointer; text-decoration: none; }
+  .auth-error { font-size: 12px; color: var(--pink); margin-top: 6px; display: none; }
+
+  #main-app { display: none; flex-direction: column; min-height: 100vh; }
+
+  .topnav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 1.5rem; height: 54px; border-bottom: 1px solid var(--border);
+    background: rgba(5,8,17,.85); backdrop-filter: blur(12px);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-icon {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    display: flex; align-items: center; justify-content: center;
+  }
+  .brand-icon svg { width: 16px; height: 16px; fill: #050811; }
+  .brand-name { font-size: 15px; font-weight: 700; letter-spacing: .05em; }
+  .brand-name span { color: var(--cyan); }
+  .topnav-right { display: flex; align-items: center; gap: 10px; }
+  .user-chip {
+    display: flex; align-items: center; gap: 7px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 20px; padding: 4px 12px 4px 5px;
+  }
+  .user-avatar {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: #050811;
+  }
+  .user-name { font-size: 12px; font-weight: 500; color: var(--text); }
+  .btn-logout {
+    font-size: 11px; padding: 5px 12px;
+    border: 1px solid var(--border2); border-radius: 8px;
+    background: transparent; color: var(--muted); cursor: pointer;
+    font-family: var(--sans); transition: color .2s, border-color .2s;
+  }
+  .btn-logout:hover { color: var(--pink); border-color: var(--pink); }
+
+  .tabnav {
+    display: flex; border-bottom: 1px solid var(--border);
+    background: var(--bg1); padding: 0 1.5rem; gap: 0; overflow-x: auto;
+  }
+  .tab-btn {
+    display: flex; align-items: center; gap: 7px; padding: 0 1.1rem; height: 46px;
+    font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: .04em;
+    border: none; background: transparent; cursor: pointer;
+    border-bottom: 2px solid transparent; white-space: nowrap;
+    transition: color .2s; font-family: var(--sans); text-transform: uppercase;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+  .tab-icon { font-size: 15px; }
+
+  .panels { flex: 1; }
+  .panel { display: none; padding: 1.75rem 1.5rem; }
+  .panel.active { display: block; }
+
+  .section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+  }
+
+  .hero {
+    border: 1px solid rgba(0,229,255,.2);
+    border-radius: 16px; padding: 1.75rem; margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, rgba(0,229,255,.04), rgba(168,85,247,.04));
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -40px; right: -40px;
+    width: 160px; height: 160px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,229,255,.08), transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--cyan); background: rgba(0,229,255,.1);
+    border: 1px solid rgba(0,229,255,.25); border-radius: 20px;
+    padding: 4px 10px; margin-bottom: 12px;
+  }
+  .hero h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .hero h2 span { color: var(--cyan); }
+  .hero p { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  .roadmap { display: flex; flex-direction: column; gap: 8px; }
+  .rm-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    background: var(--bg1); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 16px; cursor: pointer;
+    transition: border-color .2s, background .2s;
+  }
+  .rm-item:hover { border-color: var(--border2); background: var(--bg2); }
+  .rm-item.open { border-color: rgba(0,229,255,.3); background: var(--bg2); }
+  .rm-num {
+    width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+    background: rgba(0,229,255,.08); border: 1px solid rgba(0,229,255,.2);
+    color: var(--cyan); font-size: 12px; font-weight: 700; font-family: var(--mono);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .rm-body { flex: 1; }
+  .rm-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .rm-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .rm-detail {
+    display: none; font-size: 13px; color: var(--muted); line-height: 1.7;
+    margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border);
+  }
+  .rm-item.open .rm-detail { display: block; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .chip {
+    font-size: 10px; font-weight: 600; letter-spacing: .06em;
+    padding: 3px 9px; border-radius: 20px; font-family: var(--mono);
+    background: rgba(0,255,136,.08); color: var(--green);
+    border: 1px solid rgba(0,255,136,.2);
+  }
+  .chevron { color: var(--muted); font-size: 14px; flex-shrink: 0; margin-top: 7px; transition: transform .2s; }
+  .rm-item.open .chevron { transform: rotate(180deg); }
+
+  .progress-wrap { height: 4px; background: var(--bg3); border-radius: 4px; margin-bottom: 1.25rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--cyan), var(--purple)); border-radius: 4px; transition: width .4s ease; }
+  .steps { display: flex; flex-direction: column; gap: 8px; }
+  .step {
+    background: var(--bg1); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden; cursor: pointer;
+    transition: border-color .2s;
+  }
+  .step.active { border-color: rgba(0,229,255,.35); }
+  .step.done { border-color: rgba(0,255,136,.25); }
+  .step-head { display: flex; align-items: center; gap: 12px; padding: 13px 16px; }
+  .snum {
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; font-family: var(--mono);
+    background: var(--bg3); color: var(--muted); border: 1px solid var(--border);
+    transition: all .25s;
+  }
+  .step.active .snum { background: rgba(0,229,255,.12); color: var(--cyan); border-color: rgba(0,229,255,.35); }
+  .step.done .snum { background: rgba(0,255,136,.12); color: var(--green); border-color: rgba(0,255,136,.3); }
+  .s-info { flex: 1; }
+  .s-title { font-size: 13px; font-weight: 600; }
+  .s-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .s-body { display: none; padding: 0 16px 16px; }
+  .step.active .s-body { display: block; }
+  .s-body p { font-size: 13px; color: var(--muted); line-height: 1.7; }
+  .code {
+    background: #020508; border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px; font-family: var(--mono);
+    font-size: 11px; line-height: 1.8; margin: 10px 0;
+    color: var(--muted); overflow-x: auto;
+  }
+  .ct { color: var(--cyan); }
+  .ca { color: var(--green); }
+  .cv { color: var(--amber); }
+  .cc { color: var(--muted); font-style: italic; }
+  .s-btn {
+    margin-top: 10px; padding: 8px 16px;
+    background: linear-gradient(135deg, rgba(0,229,255,.15), rgba(168,85,247,.15));
+    border: 1px solid rgba(0,229,255,.3); border-radius: 8px;
+    color: var(--cyan); font-size: 12px; font-weight: 600; font-family: var(--sans);
+    cursor: pointer; letter-spacing: .04em;
+    transition: background .2s, border-color .2s;
+  }
+  .s-btn:hover { background: linear-gradient(135deg, rgba(0,229,255,.25), rgba(168,85,247,.25)); }
+
+  .domain-box {
+    background: var(--bg1); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.25rem; margin-bottom: 1.25rem;
+  }
+  .domain-row { display: flex; gap: 8px; margin-top: 10px; }
+  .domain-input {
+    flex: 1; padding: 10px 14px; border: 1px solid var(--border2);
+    border-radius: 10px; font-size: 14px; background: var(--bg2);
+    color: var(--text); outline: none; font-family: var(--mono);
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .domain-input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,229,255,.08); }
+  .btn-search {
+    padding: 10px 18px; background: linear-gradient(135deg, var(--cyan), var(--purple));
+    color: #050811; border: none; border-radius: 10px; font-size: 12px; font-weight: 700;
+    cursor: pointer; white-space: nowrap; font-family: var(--sans); letter-spacing: .04em;
+  }
+  .domain-results { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+  .dr {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 14px;
+  }
+  .dr-name { font-size: 13px; font-weight: 600; font-family: var(--mono); color: var(--text); }
+  .avail { font-size: 11px; font-weight: 700; color: var(--green); }
+  .taken { font-size: 11px; font-weight: 700; color: var(--pink); }
+  .dr-price { font-size: 12px; font-weight: 700; color: var(--cyan); font-family: var(--mono); }
+  .guide { display: flex; flex-direction: column; gap: 8px; }
+  .guide-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: var(--bg1); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px;
+  }
+  .guide-num {
+    width: 26px; height: 26px; border-radius: 6px; flex-shrink: 0;
+    background: rgba(168,85,247,.12); border: 1px solid rgba(168,85,247,.25);
+    color: var(--purple); font-size: 11px; font-weight: 700; font-family: var(--mono);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .guide-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .guide-text { font-size: 12px; color: var(--muted); line-height: 1.6; margin-top: 3px; }
+  .reg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-top: 10px; }
+  .reg-card {
+    background: var(--bg1); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px; text-align: center;
+  }
+  .reg-name { font-size: 13px; font-weight: 600; color: var(--cyan); font-family: var(--mono); }
+  .reg-note { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  .chat-wrap {
+    display: flex; flex-direction: column; height: 500px;
+    background: var(--bg1); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden;
+  }
+  .chat-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+  }
+  .chat-head-l { display: flex; align-items: center; gap: 8px; }
+  .online-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .chat-title { font-size: 13px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text); }
+  .chat-count { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+  .chat-msgs { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .msg { display: flex; gap: 8px; align-items: flex-start; }
+  .msg.mine { flex-direction: row-reverse; }
+  .msg-av {
+    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700;
+  }
+  .msg-body { max-width: 72%; }
+  .msg-name { font-size: 10px; color: var(--muted); margin-bottom: 3px; font-family: var(--mono); text-transform: uppercase; letter-spacing: .06em; }
+  .msg.mine .msg-name { text-align: right; }
+  .bubble {
+    padding: 8px 12px; border-radius: 12px; font-size: 13px; line-height: 1.5;
+    background: var(--bg3); color: var(--text); border: 1px solid var(--border);
+  }
+  .msg.mine .bubble {
+    background: linear-gradient(135deg, rgba(0,229,255,.15), rgba(168,85,247,.15));
+    border-color: rgba(0,229,255,.3); color: var(--text);
+  }
+  .msg-time { font-size: 10px; color: var(--muted); margin-top: 3px; font-family: var(--mono); }
+  .msg.mine .msg-time { text-align: right; }
+  .typing { font-size: 11px; color: var(--muted); padding: 4px 16px; min-height: 22px; font-family: var(--mono); font-style: italic; }
+  .chat-footer {
+    border-top: 1px solid var(--border); padding: 10px 12px;
+    display: flex; gap: 8px; align-items: center; background: var(--bg2);
+  }
+  .chat-input {
+    flex: 1; padding: 9px 14px; border: 1px solid var(--border2);
+    border-radius: 20px; font-size: 13px; background: var(--bg3);
+    color: var(--text); outline: none; font-family: var(--sans);
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .chat-input:focus { border-color: var(--cyan); box-shadow: 0 0 0 2px rgba(0,229,255,.1); }
+  .btn-send {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: opacity .2s; color: #050811;
+  }
+  .btn-send:hover { opacity: .85; }
+  .btn-send svg { width: 16px; height: 16px; fill: #050811; }
+
+  #main-app::after {
+    content: ''; position: fixed; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.03) 2px, rgba(0,0,0,.03) 4px);
+    z-index: 9999;
+  }
+</style>
+</head>
+<body>
+
+<div id="auth-screen">
+  <div class="auth-glow"></div>
+  <div class="auth-card">
+    <div class="auth-logo">
+      <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    </div>
+    <div class="auth-title" id="auth-title">Entrar na plataforma</div>
+    <div class="auth-sub" id="auth-sub">Aprenda a programar do zero</div>
+    <div class="field-group">
+      <label class="field-label" for="username">Usuário</label>
+      <input class="auth-input" id="username" type="text" placeholder="seu_nome" autocomplete="off">
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="password">Senha</label>
+      <input class="auth-input" id="password" type="password" placeholder="••••••••">
+    </div>
+    <div class="auth-error" id="auth-error"></div>
+    <button class="btn-primary" onclick="doAuth()">Entrar</button>
+    <div class="auth-toggle" id="auth-toggle">
+      Não tem conta? <a onclick="toggleMode()">Criar conta</a>
+    </div>
+  </div>
+</div>
+
+<div id="main-app">
+
+  <nav class="topnav">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <span class="brand-name">Dev<span>Start</span></span>
+    </div>
+    <div class="topnav-right">
+      <div class="user-chip">
+        <div class="user-avatar" id="uav">?</div>
+        <span class="user-name" id="ulabel"></span>
+      </div>
+      <button class="btn-logout" onclick="logout()">Sair</button>
+    </div>
+  </nav>
+
+  <nav class="tabnav">
+    <button class="tab-btn active" onclick="tab(0)">
+      <span class="tab-icon">⚡</span> Introdução
+    </button>
+    <button class="tab-btn" onclick="tab(1)">
+      <span class="tab-icon">🖥</span> Primeiro site
+    </button>
+    <button class="tab-btn" onclick="tab(2)">
+      <span class="tab-icon">🌐</span> Domínio .com
+    </button>
+    <button class="tab-btn" onclick="tab(3)">
+      <span class="tab-icon">💬</span> Comunidade
+    </button>
+  </nav>
+
+  <div class="panels">
+
+    <div class="panel active" id="p0">
+      <div class="hero">
+        <div class="hero-badge">⚡ Para iniciantes</div>
+        <h2>Bem-vindo ao mundo da <span>programação</span></h2>
+        <p>Programar é como dar instruções a um computador. Com o tempo certo e as ferramentas certas, qualquer pessoa consegue aprender — independente da idade ou área de formação.</p>
+      </div>
+      <div class="section-label">Roteiro sugerido — clique para expandir</div>
+      <div class="roadmap">
+        <div class="rm-item" onclick="toggleRM(this)">
+          <div class="rm-num">01</div>
+          <div class="rm-body">
+            <div class="rm-title">HTML — a estrutura de tudo</div>
+            <div class="rm-desc">A linguagem que define o que existe numa página.</div>
+            <div class="rm-detail">HTML é o esqueleto de qualquer site. Você aprende tags, títulos, parágrafos, imagens, links e formulários. Em 2 a 4 semanas você já consegue montar uma página completa. É a primeira linguagem de quase todo dev web.
+              <div class="chips"><span class="chip">Tags</span><span class="chip">Semântica</span><span class="chip">Formulários</span><span class="chip">Links</span></div>
+            </div>
+          </div>
+          <span class="chevron">▾</span>
+        </div>
+        <div class="rm-item" onclick="toggleRM(this)">
+          <div class="rm-num">02</div>
+          <div class="rm-body">
+            <div class="rm-title">CSS — cores, fontes e layout</div>
+            <div class="rm-desc">Transforma HTML simples em design bonito e responsivo.</div>
+            <div class="rm-detail">CSS controla cores, espaçamentos, fontes e animações, e faz o site funcionar bem no celular. Junto com HTML, já dá pra criar sites estáticos profissionais.
+              <div class="chips"><span class="chip">Flexbox</span><span class="chip">Grid</span><span class="chip">Responsivo</span><span class="chip">Animações</span></div>
+            </div>
+          </div>
+          <span class="chevron">▾</span>
+        </div>
+        <div class="rm-item" onclick="toggleRM(this)">
+          <div class="rm-num">03</div>
+          <div class="rm-body">
+            <div class="rm-title">JavaScript — interatividade</div>
+            <div class="rm-desc">A linguagem que faz o site reagir às ações do usuário.</div>
+            <div class="rm-detail">Com JS você cria menus dinâmicos, validações, carregamento de dados sem recarregar a página e muito mais. É a porta de entrada para lógica de programação no navegador.
+              <div class="chips"><span class="chip">Variáveis</span><span class="chip">Funções</span><span class="chip">DOM</span><span class="chip">APIs</span></div>
+            </div>
+          </div>
+          <span class="chevron">▾</span>
+        </div>
+        <div class="rm-item" onclick="toggleRM(this)">
+          <div class="rm-num">04</div>
+          <div class="rm-body">
+            <div class="rm-title">Ferramentas do dia a dia</div>
+            <div class="rm-desc">Editor, versionamento e hospedagem.</div>
+            <div class="rm-detail">VS Code (editor gratuito), Git (salvar versões do código), GitHub (guardar e compartilhar projetos) e Vercel ou Netlify (publicar seu site de graça). Todas amplamente usadas por profissionais.
+              <div class="chips"><span class="chip">VS Code</span><span class="chip">Git</span><span class="chip">GitHub</span><span class="chip">Vercel</span></div>
+            </div>
+          </div>
+          <span class="chevron">▾</span>
+        </div>
+        <div class="rm-item" onclick="toggleRM(this)">
+          <div class="rm-num">05</div>
+          <div class="rm-body">
+            <div class="rm-title">Onde aprender de graça</div>
+            <div class="rm-desc">Plataformas e recursos em português.</div>
+            <div class="rm-detail">Curso em Vídeo (YouTube, Gustavo Guanabara), freeCodeCamp (traduzido), The Odin Project e MDN Web Docs para referência técnica. Consistência é mais importante que velocidade.
+              <div class="chips"><span class="chip">YouTube</span><span class="chip">freeCodeCamp</span><span class="chip">Odin Project</span><span class="chip">MDN</span></div>
+            </div>
+          </div>
+          <span class="chevron">▾</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="p1">
+      <div class="section-label">Progresso</div>
+      <div class="progress-wrap"><div class="progress-fill" id="prog" style="width:14%"></div></div>
+      <div class="steps">
+        <div class="step active" id="s0">
+          <div class="step-head" onclick="openStep(0)">
+            <div class="snum">01</div>
+            <div class="s-info"><div class="s-title">Instale o VS Code</div><div class="s-sub">O editor mais usado no mundo — grátis</div></div>
+            <span class="chevron">▾</span>
+          </div>
+          <div class="s-body">
+            <p>Acesse <strong style="color:var(--cyan)">code.visualstudio.com</strong>, baixe e instale. Depois instale a extensão <em>Live Server</em> para ver o site em tempo real enquanto edita.</p>
+            <button class="s-btn" onclick="completeStep(0)">Concluído → próximo</button>
+          </div>
+        </div>
+        <div class="step" id="s1">
+          <div class="step-head" onclick="openStep(1)">
+            <div class="snum">02</div>
+            <div class="s-info"><div class="s-title">Crie a pasta do projeto</div><div class="s-sub">Organização desde o início</div></div>
+            <span class="chevron">▾</span>
+          </div>
+          <div class="s-body">
+            <p>Crie uma pasta chamada <code style="color:var(--cyan);font-family:var(--mono)">meu-site</code>. Abra no VS Code com <strong style="color:var(--text)">Arquivo → Abrir Pasta</strong>.</p>
+            <button class="s-btn" onclick="completeStep(1)">Concluído → próximo</button>
+          </div>
+        </div>
+        <div class="step" id="s2">
+          <div class="step-head" onclick="openStep(2)">
+            <div class="snum">03</div>
+            <div class="s-info"><div class="s-title">Crie o index.html</div><div class="s-sub">O arquivo principal de qualquer site</div></div>
+            <span class="chevron">▾</span>
+          </div>
+          <div class="s-body">
+            <p>Crie um arquivo <code style="color:var(--cyan);font-family:var(--mono)">index.html</code> e cole o código abaixo:</p>
+            <div class="code">
+<span class="ct">&lt;!DOCTYPE html&gt;</span><br>
+<span class="ct">&lt;html</span> <span class="ca">lang</span>=<span class="cv">"pt-BR"</span><span class="ct">&gt;</span><br>
+<span class="ct">&lt;head&gt;</span><br>
+  <span class="ct">&lt;meta</span> <span class="ca">charset</span>=<span class="cv">"UTF-8"</span><span class="ct">&gt;</span><br>
+  <span class="ct">&lt;title&gt;</span>Meu Primeiro Site<span class="ct">&lt;/title&gt;</span><br>
+<span class="ct">&lt;/head&gt;</span><br>
+<span class="ct">&lt;body&gt;</span><br>
+  <span class="ct">&lt;h1&gt;</span>Olá, mundo!<span class="ct">&lt;/h1&gt;</span><br>
+  <span class="ct">&lt;p&gt;</span>Meu primeiro site.<span class="ct">&lt;/p&gt;</span><br>
+<span class="ct">&lt;/body&gt;</span><br>
+<span class="ct">&lt;/html&gt;</span>
+            </div>
+            <button class="s-btn" onclick="completeStep(2)">Concluído → próximo</button>
+          </div>
+        </div>
+        <div class="step" id="s3">
+          <div class="step-head" onclick="openStep(3)">
+            <div class="snum">04</div>
+            <div class="s-info"><div class="s-title">Adicione CSS</div><div class="s-sub">Deixe o site com sua cara</div></div>
+            <span class="chevron">▾</span>
+          </div>
+          <div class="s-body">
+            <p>Crie <code style="color:var(--cyan);font-family:var(--mono)">style.css</code> e adicione no HTML dentro do <code style="color:var(--cyan);font-family:var(--mono)">&lt;head&gt;</code>:</p>
+            <div class="code">
+<span class="ct">&lt;link</span> <span class="ca">rel</span>=<span class="cv">"stylesheet"</span> <span class="ca">href</span>=<span class="cv">"style.css"</span><span class="ct">&gt;</span><br><br>
+<span class="cc">/* No style.css: */</span><br>
+<span class="ca">body</span> { background: <span class="cv">#0a0a0f</span>; font-family: sans-serif; }<br>
+<span class="ca">h1</span> { color: <span class="cv">#00e5ff</span>; }
+            </div>
+            <button class="s-btn" onclick="completeStep(3)">Concluído → próximo</button>
+          </div>
+        </div>
+        <div class="step" id="s4">
+          <div class="step-head" onclick="openStep(4)">
+            <div class="snum">05</div>
+            <div class="s-info"><div class="s-title">Publique no GitHub Pages</div><div class="s-sub">Seu site online — de graça, com HTTPS</div></div>
+            <span class="chevron">▾</span>
+          </div>
+          <div class="s-body">
+            <p>Crie conta em <strong style="color:var(--cyan)">github.com</strong>, crie um repositório chamado <code style="color:var(--cyan);font-family:var(--mono)">seuusuario.github.io</code>, envie os arquivos e ative o <strong style="color:var(--text)">GitHub Pages</strong> nas configurações.</p>
+            <button class="s-btn" onclick="completeStep(4)">Concluído → próximo</button>
+          </div>
+        </div>
+        <div class="step" id="s5">
+          <div class="step-head" onclick="openStep(5)">
+            <div class="snum">06</div>
+            <div class="s-info"><div class="s-title">Adicione JavaScript</div><div class="s-sub">Interatividade básica</div></div>
+            <span class="chevron">▾</span>
+          </div>
+          <div class="s-body">
+            <p>Crie <code style="color:var(--cyan);font-family:var(--mono)">script.js</code> e adicione antes do <code style="color:var(--cyan);font-family:var(--mono)">&lt;/body&gt;</code>:</p>
+            <div class="code">
+<span class="ct">&lt;button</span> <span class="ca">onclick</span>=<span class="cv">"saudar()"</span><span class="ct">&gt;</span>Clique<span class="ct">&lt;/button&gt;</span><br>
+<span class="ct">&lt;script</span> <span class="ca">src</span>=<span class="cv">"script.js"</span><span class="ct">&gt;&lt;/script&gt;</span><br><br>
+<span class="cc">// No script.js:</span><br>
+<span class="ca">function</span> <span class="ct">saudar</span>() {<br>
+  alert(<span class="cv">"Olá do JavaScript!"</span>);<br>
+}
+            </div>
+            <button class="s-btn" onclick="completeStep(5)">Concluído! 🎉</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="p2">
+      <div class="domain-box">
+        <div class="section-label">Verificar disponibilidade</div>
+        <div class="domain-row">
+          <input class="domain-input" id="dinput" type="text" placeholder="nome-do-seu-site" oninput="document.getElementById('dres').innerHTML=''">
+          <button class="btn-search" onclick="searchDomain()">🔍 Verificar</button>
+        </div>
+        <div class="domain-results" id="dres"></div>
+      </div>
+      <div class="section-label">Como registrar — passo a passo</div>
+      <div class="guide">
+        <div class="guide-item">
+          <div class="guide-num">01</div>
+          <div><div class="guide-title">Escolha e verifique o nome</div><div class="guide-text">Pense em um nome curto, fácil de falar e memorizar. Prefira .com para alcance global. Verifique a disponibilidade em Registro.br ou Namecheap.</div></div>
+        </div>
+        <div class="guide-item">
+          <div class="guide-num">02</div>
+          <div><div class="guide-title">Escolha um registrador</div><div class="guide-text">Para .com: Namecheap (~R$ 70/ano), GoDaddy ou Hostinger. Para .com.br: use Registro.br (~R$ 40/ano) — único autorizado pelo NIC.br.</div></div>
+        </div>
+        <div class="guide-item">
+          <div class="guide-num">03</div>
+          <div><div class="guide-title">Registre e pague</div><div class="guide-text">Crie conta no registrador, adicione ao carrinho e pague. Ative a renovação automática para não perder o domínio por esquecimento.</div></div>
+        </div>
+        <div class="guide-item">
+          <div class="guide-num">04</div>
+          <div><div class="guide-title">Configure o DNS</div><div class="guide-text">Aponte o domínio para sua hospedagem editando os nameservers no painel do registrador — Vercel, Netlify ou GitHub Pages fornecem esses dados.</div></div>
+        </div>
+        <div class="guide-item">
+          <div class="guide-num">05</div>
+          <div><div class="guide-title">Ative o HTTPS (SSL grátis)</div><div class="guide-text">Vercel, Netlify e Cloudflare oferecem SSL gratuito. Basta ativar nas configurações. O cadeado aparece em poucas horas.</div></div>
+        </div>
+      </div>
+      <div style="margin-top:1.25rem">
+        <div class="section-label">Registradores recomendados</div>
+        <div class="reg-grid">
+          <div class="reg-card"><div class="reg-name">Registro.br</div><div class="reg-note">.com.br oficial</div></div>
+          <div class="reg-card"><div class="reg-name">Namecheap</div><div class="reg-note">.com acessível</div></div>
+          <div class="reg-card"><div class="reg-name">GoDaddy</div><div class="reg-note">mais conhecido</div></div>
+          <div class="reg-card"><div class="reg-name">Hostinger</div><div class="reg-note">hospedagem + domínio</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="p3">
+      <div class="chat-wrap">
+        <div class="chat-head">
+          <div class="chat-head-l">
+            <div class="online-dot"></div>
+            <div class="chat-title">Comunidade DevStart</div>
+          </div>
+          <div class="chat-count" id="ocnt">4 online</div>
+        </div>
+        <div class="chat-msgs" id="cmsg"></div>
+        <div class="typing" id="typo"></div>
+        <div class="chat-footer">
+          <input class="chat-input" id="cinput" type="text" placeholder="Escreva uma mensagem..." onkeydown="if(event.key==='Enter')sendMsg()">
+          <button class="btn-send" onclick="sendMsg()" aria-label="Enviar">
+            <svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let isLogin=true, currentUser=null;
+let users={};
+try{users=JSON.parse(localStorage.getItem('ds_users')||'{}');}catch(e){}
+let doneSteps=new Set(), msgIdx=0;
+
+const bots=[
+  {n:'Carla',c:'#a855f7',bg:'rgba(168,85,247,.18)',i:'CA'},
+  {n:'Pedro',c:'#00e5ff',bg:'rgba(0,229,255,.12)',i:'PE'},
+  {n:'Ana',c:'#00ff88',bg:'rgba(0,255,136,.12)',i:'AN'},
+];
+const botMsgs=[
+  "Alguém aqui está aprendendo HTML pela primeira vez? 😄",
+  "Acabei de publicar meu primeiro site no GitHub Pages!",
+  "Dica: Ctrl+/ comenta código no VS Code",
+  "CSS Grid finalmente fez sentido pra mim hoje!",
+  "Qual a diferença entre margin e padding mesmo? Confundo sempre",
+  "Recomendo muito o canal Curso em Vídeo no YouTube",
+  "Finalmente entendi o que é flexbox!",
+  "Alguém usa Tailwind CSS? Vale a pena?",
+  "Meu primeiro freela foi uma landing page simples. Começou assim 🙌",
+  "JavaScript é difícil no começo mas depois pega o jeito",
+  "DOM pareceu complicado até parecer óbvio haha",
+];
+
+function doAuth(){
+  const u=document.getElementById('username').value.trim();
+  const p=document.getElementById('password').value;
+  const err=document.getElementById('auth-error');
+  if(!u||!p){showErr('Preencha todos os campos.');return;}
+  if(u.length<3){showErr('Nome muito curto (mínimo 3 chars).');return;}
+  if(p.length<4){showErr('Senha muito curta (mínimo 4 chars).');return;}
+  if(!isLogin){
+    if(users[u]){showErr('Nome já em uso. Tente outro.');return;}
+    users[u]=p;try{localStorage.setItem('ds_users',JSON.stringify(users));}catch(e){}
+    isLogin=true;
+  }else{
+    if(!users[u]||users[u]!==p){showErr('Nome ou senha incorretos.');return;}
+  }
+  err.style.display='none';
+  currentUser=u; enterApp();
+}
+function showErr(m){const e=document.getElementById('auth-error');e.textContent=m;e.style.display='block';}
+function toggleMode(){
+  isLogin=!isLogin;
+  document.getElementById('auth-title').textContent=isLogin?'Entrar na plataforma':'Criar conta';
+  document.getElementById('auth-sub').textContent=isLogin?'Aprenda a programar do zero':'Junte-se à comunidade DevStart';
+  document.getElementById('auth-toggle').innerHTML=isLogin?'Não tem conta? <a onclick="toggleMode()">Criar conta</a>':'Já tem conta? <a onclick="toggleMode()">Entrar</a>';
+  document.getElementById('auth-error').style.display='none';
+}
+function enterApp(){
+  document.getElementById('auth-screen').style.display='none';
+  const app=document.getElementById('main-app'); app.style.display='flex';
+  document.getElementById('ulabel').textContent=currentUser;
+  document.getElementById('uav').textContent=currentUser.slice(0,2).toUpperCase();
+  initChat();
+}
+function logout(){
+  currentUser=null;
+  document.getElementById('auth-screen').style.display='flex';
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('username').value='';
+  document.getElementById('password').value='';
+}
+function tab(n){
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===n));
+  document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle('active',i===n));
+}
+function toggleRM(el){el.classList.toggle('open');}
+function openStep(n){
+  document.querySelectorAll('.step').forEach((c,i)=>{
+    if(i===n&&!doneSteps.has(i))c.classList.add('active');
+    else if(!doneSteps.has(i))c.classList.remove('active');
+  });
+}
+function completeStep(n){
+  doneSteps.add(n);
+  const c=document.getElementById('s'+n);
+  c.classList.remove('active'); c.classList.add('done');
+  c.querySelector('.snum').textContent='✓';
+  const pct=Math.round((doneSteps.size/6)*100);
+  document.getElementById('prog').style.width=pct+'%';
+  const nx=n+1;
+  if(nx<6)document.getElementById('s'+nx).classList.add('active');
+}
+function searchDomain(){
+  const raw=document.getElementById('dinput').value.trim().toLowerCase().replace(/[^a-z0-9-]/g,'');
+  if(!raw)return;
+  const bad=new Set(['google','facebook','youtube','amazon','github','twitter','instagram']);
+  const taken=bad.has(raw)||(raw.length<3);
+  const prices={'.com':'R$ 72/ano','.com.br':'R$ 40/ano','.net':'R$ 65/ano','.io':'R$ 180/ano'};
+  const html=['.com','.com.br','.net','.io'].map(e=>{
+    const t=taken||(e==='.com'&&raw.length<4);
+    return `<div class="dr"><span class="dr-name">${raw}${e}</span><span class="${t?'taken':'avail'}">${t?'✕ Indisponível':'✓ Disponível'}</span>${t?'':'<span class="dr-price">'+prices[e]+'</span>'}</div>`;
+  }).join('');
+  document.getElementById('dres').innerHTML=html;
+}
+function gt(){const d=new Date();return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');}
+function addMsg(name,text,mine,color,bg,ini){
+  const msgs=document.getElementById('cmsg');
+  const d=document.createElement('div');
+  d.className='msg'+(mine?' mine':'');
+  const avStyle=mine?'background:linear-gradient(135deg,var(--cyan),var(--purple));color:#050811':`background:${bg};color:${color}`;
+  d.innerHTML=`<div class="msg-av" style="${avStyle}">${ini||name.slice(0,2).toUpperCase()}</div><div class="msg-body"><div class="msg-name">${name}</div><div class="bubble">${text}</div><div class="msg-time">${gt()}</div></div>`;
+  msgs.appendChild(d); msgs.scrollTop=msgs.scrollHeight;
+}
+function sendMsg(){
+  const inp=document.getElementById('cinput');
+  const t=inp.value.trim(); if(!t)return;
+  inp.value=''; addMsg(currentUser,t,true);
+  setTimeout(botReply,1200+Math.random()*1800);
+}
+function botReply(){
+  const b=bots[Math.floor(Math.random()*bots.length)];
+  const ty=document.getElementById('typo');
+  ty.textContent=b.n+' está digitando...';
+  setTimeout(()=>{
+    ty.textContent='';
+    addMsg(b.n,botMsgs[msgIdx%botMsgs.length],false,b.c,b.bg,b.i);
+    msgIdx++;
+  },1000+Math.random()*1500);
+}
+function initChat(){
+  document.getElementById('cmsg').innerHTML='';
+  const seed=[
+    {b:bots[0],m:"Oi pessoal! Bem-vindo à comunidade DevStart 👋"},
+    {b:bots[1],m:"Fala galera! Que ótimo ver mais gente aqui"},
+    {b:bots[2],m:"Se tiver dúvida, pode perguntar à vontade!"},
+  ];
+  seed.forEach((s,i)=>setTimeout(()=>addMsg(s.b.n,s.m,false,s.b.c,s.b.bg,s.b.i),i*600));
+  setInterval(()=>{
+    if(Math.random()<0.3){
+      const b=bots[Math.floor(Math.random()*bots.length)];
+      const ty=document.getElementById('typo');
+      ty.textContent=b.n+' está digitando...';
+      setTimeout(()=>{ty.textContent='';addMsg(b.n,botMsgs[msgIdx%botMsgs.length],false,b.c,b.bg,b.i);msgIdx++;},1200);
+    }
+  },8000);
+  const cnts=[3,4,5,4,6,3,5]; let ci=0;
+  setInterval(()=>{document.getElementById('ocnt').textContent=cnts[ci%cnts.length]+' online';ci++;},7000);
+}
+document.getElementById('password').addEventListener('keydown',e=>{if(e.key==='Enter')doAuth();});
+</script>
+</body>
+</html>
+```
+
+Salve como `devstart.html` e abra direto no navegador — funciona 100% offline, sem precisar de servidor. O arquivo também está disponível para download acima.
